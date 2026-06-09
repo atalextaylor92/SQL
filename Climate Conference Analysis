@@ -1,0 +1,114 @@
+-- This project utilizes the following Climate Conference data:
+-- Database: https://www.db-fiddle.com/f/pxMci1sLL945KHKYvpe9W6/1
+
+-- For this project, I used SQL to query a Climate Conference database to manage VIP speakers, track hotel reservations, and analyze event attendance.
+
+-- Quick look at the data
+SELECT *
+FROM vips
+LIMIT 5;
+
+SELECT *
+FROM events
+LIMIT 5;
+
+SELECT *
+FROM hotels
+LIMIT 5;
+
+SELECT *
+FROM reservations
+LIMIT 5;
+
+-- All VIPs and the event they are presenting at, if applicable
+SELECT vips.last_name,
+    vips.first_name,
+    vips.association,
+    events.event_name,
+    events.event_type
+FROM vips
+LEFT JOIN events
+    ON vips.event = events.event_id
+ORDER BY events.event_type, vips.last_name;
+
+-- Confirmed speakers only, with full event details
+SELECT vips.last_name,
+    vips.first_name,
+    vips.association,
+    vips.assoc_type,
+    events.event_name,
+    events.event_type
+FROM vips
+INNER JOIN events
+    ON vips.event = events.event_id
+ORDER BY events.event_type, vips.last_name;
+
+-- Full VIP overview: event assignment, hotel, and dinner RSVP status
+SELECT vips.last_name,
+    vips.first_name,
+    events.event_name,
+    hotels.hotel_name,
+    reservations.welcome_rsvp,
+    reservations.dinner_rsvp
+FROM vips
+LEFT JOIN events
+    ON vips.event = events.event_id
+INNER JOIN reservations
+    ON vips.member_id = reservations.member_id
+INNER JOIN hotels
+    ON reservations.hotel = hotels.hotel_id
+ORDER BY events.event_name, vips.last_name;
+
+-- Feedback pairings: each VIP and the speaker they are reviewing
+SELECT v1.last_name AS reviewer_last_name,
+    v1.first_name AS reviewer_first_name,
+    v2.last_name AS speaker_last_name,
+    v2.first_name AS speaker_first_name
+FROM vips v1
+INNER JOIN vips v2
+    ON v1.provides_feedback_to = v2.member_id
+ORDER BY v1.last_name;
+
+-- Welcome party and dinner RSVP totals by association type
+SELECT vips.assoc_type,
+    COUNT(vips.member_id) AS total_vips,
+    SUM(reservations.welcome_rsvp) AS welcome_party_confirmed,
+    SUM(reservations.dinner_rsvp) AS dinner_confirmed
+FROM vips
+INNER JOIN reservations
+    ON vips.member_id = reservations.member_id
+GROUP BY vips.assoc_type
+ORDER BY total_vips DESC;
+
+-- VIPs staying at the most-booked hotel
+SELECT vips.last_name,
+    vips.first_name,
+    vips.association,
+    hotels.hotel_name
+FROM reservations
+INNER JOIN vips
+    ON reservations.member_id = vips.member_id
+INNER JOIN hotels
+    ON reservations.hotel = hotels.hotel_id
+WHERE reservations.hotel = (
+    SELECT hotel
+    FROM reservations
+    GROUP BY hotel
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+)
+ORDER BY vips.last_name;
+
+-- VIPs who have confirmed both the welcome party and the thank you dinner
+SELECT vips.last_name,
+    vips.first_name,
+    vips.association,
+    vips.assoc_type,
+    reservations.welcome_rsvp,
+    reservations.dinner_rsvp
+FROM vips
+INNER JOIN reservations
+    ON vips.member_id = reservations.member_id
+WHERE reservations.welcome_rsvp = 1
+AND reservations.dinner_rsvp = 1
+ORDER BY vips.last_name;
