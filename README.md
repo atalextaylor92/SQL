@@ -7,3 +7,4 @@ Welcome to my SQL portfolio! This repository contains examples of SQL queries I'
 - Fortune 500 Analysis
 - Climate Conference Analysis
 - Customer and Order Analysis
+- Spotify Analysis
