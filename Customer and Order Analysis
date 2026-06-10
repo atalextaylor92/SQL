@@ -49,3 +49,13 @@ LEFT JOIN BIT_DB.customers cust
 WHERE feb.Quantity > 2
 AND length(orderid) = 6
 AND orderid <> 'Order ID';
+
+-- Total quantity sold on February 18th, 2019
+SELECT SUM(quantity)
+FROM BIT_DB.FebSales
+WHERE orderdate LIKE '02/18/19%';
+
+-- Total revenue for all orders placed in February 2019
+SELECT SUM(quantity * price) AS revenue
+FROM BIT_DB.FebSales
+WHERE orderdate LIKE '02/%/19%';
