@@ -8,3 +8,4 @@ Welcome to my SQL portfolio! This repository contains examples of SQL queries I'
 - Climate Conference Analysis
 - Customer and Order Analysis
 - Spotify Analysis
+- Chinook Music Store Analysis
